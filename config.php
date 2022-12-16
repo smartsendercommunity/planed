@@ -6,6 +6,8 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST');
 header('Content-Type: application/json; charset=utf-8');
 http_response_code(200);
+ini_set('display_errors', '1');
+error_reporting(E_ERROR);
 
 $server = "";
 $username = "";
