@@ -13,6 +13,8 @@ if ($getList != NULL && is_array($getList)) {
         $action = json_decode(send_bearer("https://api.smartsender.com/v1/contacts/".$oneList["userId"]."/fire", $oneList["token"], "POST", $fire), true);
         $log["data"][$key]["fire"] = $fire;
         $log["data"][$key]["result"] = $action;
-        mysqli_query($sqlConnect, "DELETE FROM `".$table."` WHERE `id` = '".$oneList["id"]."'");
+        if ($action["state"] == true) {
+            mysqli_query($sqlConnect, "DELETE FROM `".$table."` WHERE `id` = '".$oneList["id"]."'");
+        }
     }
 }
