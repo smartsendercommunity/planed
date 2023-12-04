@@ -31,16 +31,38 @@ if ($input["time"] == NULL) {
 } else {
     $time = $input["time"];
     settype($time, "int"); settype($time, "string"); settype($input["time"], "string");
-    if ($time == $input["time"]) {
+    if ($time == $input["time"]) { // Якщо в тілі запиту часова мітка
         if ($time <= time()) {
             $result["state"] = false;
             $result["error"]["message"][] = "'time' in the past1";
         }
-    } else {
-        $time = strtotime($input["time"]);
-        if ($time <= time()) {
-            $result["state"] = false;
-            $result["error"]["message"][] = "'time' in the past2";
+    } else { // Якщо в тілі запиту рядкове представлення часу
+        if ($input["autotime"] === true && stripos($input["time"], "+") !== false) {
+            $appendTime = "+".explode("+", $input["time"], 2)[1];
+            $count = 0;
+            for ($time = strtotime($input["time"]); time() > $time; $time = strtotime($appendTime, $time)) {
+                $count++;
+                if ($count > 100) {
+                    $result["state"] = false;
+                    $result["error"]["message"][] = "failed use appendTime";
+                    break;
+                }
+            }
+        } else if ($input["autotime"] === true && $input["appendTime"] != NULL) {
+            for ($time = strtotime($input["time"]); time() > $time; $time = strtotime($input["appendTime"], $time)) {
+                $count++;
+                if ($count > 100) {
+                    $result["state"] = false;
+                    $result["error"]["message"][] = "failed use appendTime";
+                    break;
+                }
+            }
+        } else {
+            $time = strtotime($input["time"]);
+            if ($time <= time()) {
+                $result["state"] = false;
+                $result["error"]["message"][] = "'time' in the past2";
+            }
         }
     }
 }
@@ -58,6 +80,7 @@ if ($insert == false) {
 } else {
     $result["state"] = true;
     $result["insert"]["id"] = mysqli_insert_id($sqlConnect);
+    $result["datetime"] = date("d.m.Y H:i:s", $time);
 }
 
 echo json_encode($result);
